@@ -12,6 +12,7 @@ class Presenter:
         self.main_window = self.builder.get_object('airport_window')
         self.main_window.show_all()
 
+        self.spinner = self.builder.get_object('spinner')
         self.arrivals = self.builder.get_object('arrivals_store')
         self.departures = self.builder.get_object('departures_store')
 
@@ -31,6 +32,7 @@ class Presenter:
         if len(text) != 4:
             return
 
+        self.spinner.start()
         self.model.set_icao(text)
 
     def _update_arrivals(self, arrivals):
@@ -43,3 +45,5 @@ class Presenter:
         list_store.clear()
         for item in items:
             list_store.append(item)
+
+        self.spinner.stop()
