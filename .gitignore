@@ -1,0 +1,11 @@
+# virtualenv
+venv/
+
+# python artifacts
+__pycache__/
+
+# editor artifacts
+.vscode/
+
+# temp files
+*~
