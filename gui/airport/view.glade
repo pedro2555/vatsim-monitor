@@ -8,7 +8,9 @@
       <column type="gchararray"/>
       <!-- column-name name -->
       <column type="gchararray"/>
-      <!-- column-name airport -->
+      <!-- column-name dep_airport -->
+      <column type="gchararray"/>
+      <!-- column-name arr_airport -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -18,7 +20,9 @@
       <column type="gchararray"/>
       <!-- column-name name -->
       <column type="gchararray"/>
-      <!-- column-name airport -->
+      <!-- column-name dep_airport -->
+      <column type="gchararray"/>
+      <!-- column-name arr_airport -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -173,7 +177,7 @@
                     <child>
                       <object class="GtkCellRendererText"/>
                       <attributes>
-                        <attribute name="text">2</attribute>
+                        <attribute name="text">3</attribute>
                       </attributes>
                     </child>
                   </object>

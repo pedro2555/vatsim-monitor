@@ -1,7 +1,7 @@
 import gi
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk, GObject
 
 class Presenter:
     def __init__(self, model):
@@ -17,8 +17,11 @@ class Presenter:
         self.departures = self.builder.get_object('departures_store')
 
         self.model = model
+        model.on_loading_changed(self._update_loading)
         model.on_arrivals_changed(self._update_arrivals)
         model.on_departures_changed(self._update_departures)
+
+        self.search_text = ''
 
     def run(self):
         Gtk.main()
@@ -27,23 +30,28 @@ class Presenter:
         Gtk.main_quit()
 
     def on_txt_search_changed(self, widget, data=None):
-        text = widget.get_text()
+        self.search_text = widget.get_text()
+        self._search_changed()
 
-        if len(text) != 4:
+    def _search_changed(self):
+        if len(self.search_text) != 4:
             return
 
-        self.spinner.start()
-        self.model.set_icao(text)
+        self.model.icao = self.search_text
+
+    def _update_loading(self, loading):
+        if loading:
+            GLib.idle_add(self.spinner.start)
+        else:
+            GLib.idle_add(self.spinner.stop)
 
     def _update_arrivals(self, arrivals):
-        self._update_list_store(self.arrivals, arrivals)
+        GLib.idle_add(self._update_list_store, self.arrivals, arrivals)
 
     def _update_departures(self, departures):
-        self._update_list_store(self.departures, departures)
+        GLib.idle_add(self._update_list_store, self.departures, departures)
 
     def _update_list_store(self, list_store, items):
         list_store.clear()
         for item in items:
             list_store.append(item)
-
-        self.spinner.stop()
