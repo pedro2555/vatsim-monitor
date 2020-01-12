@@ -30,6 +30,7 @@
     <property name="can_focus">False</property>
     <property name="default_width">640</property>
     <property name="default_height">320</property>
+    <property name="icon">../icon.png</property>
     <signal name="destroy" handler="on_airport_window_destroy" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar">
