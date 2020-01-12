@@ -15,6 +15,8 @@ class Presenter:
         self.spinner = self.builder.get_object('spinner')
         self.arrivals = self.builder.get_object('arrivals_store')
         self.departures = self.builder.get_object('departures_store')
+        self.txt_arrivals = self.builder.get_object('txt_arrivals')
+        self.txt_departures = self.builder.get_object('txt_departures')
 
         self.model = model
         model.on_loading_changed(self._update_loading)
@@ -46,9 +48,11 @@ class Presenter:
             GLib.idle_add(self.spinner.stop)
 
     def _update_arrivals(self, arrivals):
+        GLib.idle_add(lambda: self.txt_arrivals.set_text(f'Arrivals ({len(arrivals)})'))
         GLib.idle_add(self._update_list_store, self.arrivals, arrivals)
 
     def _update_departures(self, departures):
+        GLib.idle_add(lambda: self.txt_departures.set_text(f'Departures ({len(departures)})'))
         GLib.idle_add(self._update_list_store, self.departures, departures)
 
     def _update_list_store(self, list_store, items):

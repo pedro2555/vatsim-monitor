@@ -65,6 +65,7 @@
           </object>
           <packing>
             <property name="pack_type">end</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -81,7 +82,7 @@
             <property name="margin_top">8</property>
             <property name="margin_bottom">8</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="txt_departures">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Departures</property>
@@ -103,7 +104,7 @@
             <property name="margin_top">8</property>
             <property name="margin_bottom">8</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="txt_arrivals">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Arrivals</property>
