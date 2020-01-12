@@ -30,7 +30,7 @@ class Model:
             self.pilots = list(pilots)
             self.loading = False
 
-            sleep(10)
+            sleep(60)
 
     @property
     def loading(self):
