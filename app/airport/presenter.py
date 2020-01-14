@@ -6,7 +6,7 @@ from gi.repository import GLib, Gtk, GObject
 class Presenter:
     def __init__(self, model):
         self.builder = Gtk.Builder()
-        self.builder.add_from_file('gui/airport/view.glade')
+        self.builder.add_from_file('app/airport.glade')
         self.builder.connect_signals(self)
 
         self.main_window = self.builder.get_object('airport_window')

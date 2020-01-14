@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from gui import airport
+from app import airport
 
 if __name__ == '__main__':
     model = airport.Model()
