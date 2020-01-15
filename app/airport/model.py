@@ -6,31 +6,28 @@ import vatsim
 
 class Model:
     def __init__(self):
-        self.listeners = defaultdict(set)
+        self._listeners = set()
 
         self._loading = False
         self._icao = None
         self._pilots = []
-        self.arrivals_listeners = set()
-        self.departures_listeners = set()
 
-        Thread(target=self.get_airport_info, daemon=True).start()
+        def pool_airports():
+            while True:
+                self.loading = True
 
-    def get_airport_info(self):
-        while True:
-            self.loading = True
+                status = vatsim.status()
+                sections = map(lambda x: x[1], status)
+                _, _, clients, _, prefile = sections
+                pilots = map(lambda x: x.split(':'), clients)
+                pilots = filter(self._is_pilot, pilots)
+                pilots = map(self._to_pilot, pilots)
+                
+                self.pilots = list(pilots)
+                self.loading = False
 
-            status = vatsim.status()
-            sections = map(lambda x: x[1], status)
-            _, _, clients, _, prefile = sections
-            pilots = map(lambda x: x.split(':'), clients)
-            pilots = filter(self._is_pilot, pilots)
-            pilots = map(self._to_pilot, pilots)
-            
-            self.pilots = list(pilots)
-            self.loading = False
-
-            sleep(60)
+                sleep(60)
+        Thread(target=pool_airports, daemon=True).start()
 
     @property
     def loading(self):
@@ -39,7 +36,7 @@ class Model:
     @loading.setter
     def loading(self, value):
         self._loading = value
-        self._notify('loading', value)
+        self._notify()
 
     @property
     def icao(self):
@@ -48,8 +45,7 @@ class Model:
     @icao.setter
     def icao(self, value):
         self._icao = value.upper()
-        self._notify('arrivals', self.arrivals)
-        self._notify('departures', self.departures)
+        self._notify()
 
     @property
     def pilots(self):
@@ -58,8 +54,7 @@ class Model:
     @pilots.setter
     def pilots(self, value):
         self._pilots = value
-        self._notify('arrivals', self.arrivals)
-        self._notify('departures', self.departures)
+        self._notify()
 
     @property
     def departures(self):
@@ -69,18 +64,12 @@ class Model:
     def arrivals(self):
         return list(filter(lambda x: x[3] == self.icao, self.pilots))
 
-    def on_loading_changed(self, callback):
-        self.listeners['loading'].add(callback)
+    def add_listener(self, listener):
+        self._listeners.add(listener)
 
-    def on_departures_changed(self, callback):
-        self.listeners['departures'].add(callback)
-
-    def on_arrivals_changed(self, callback):
-        self.listeners['arrivals'].add(callback)
-
-    def _notify(self, listener, args):
-        for callback in self.listeners[listener]:
-            callback(args)
+    def _notify(self):
+        for listener in self._listeners:
+            listener(self)
 
     def _is_pilot(self, line):
         clienttype = line[3].upper()

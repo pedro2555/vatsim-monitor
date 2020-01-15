@@ -19,9 +19,7 @@ class Presenter:
         self.txt_departures = self.builder.get_object('txt_departures')
 
         self.model = model
-        model.on_loading_changed(self._update_loading)
-        model.on_arrivals_changed(self._update_arrivals)
-        model.on_departures_changed(self._update_departures)
+        model.add_listener(self._on_model_changed)
 
         self.search_text = ''
 
@@ -40,6 +38,11 @@ class Presenter:
             return
 
         self.model.icao = self.search_text
+
+    def _on_model_changed(self, model):
+        self._update_loading(model.loading)
+        self._update_arrivals(model.arrivals)
+        self._update_departures(model.departures)
 
     def _update_loading(self, loading):
         if loading:
