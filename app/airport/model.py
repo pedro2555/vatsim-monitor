@@ -6,37 +6,30 @@ import vatsim
 
 class Model:
     def __init__(self):
-        self._listeners = set()
+        self.loading = False
+        self.pilots = []
+        self.page = 'list'
 
-        self._loading = False
-        self._icao = None
-        self._pilots = []
+        self._listeners = set()
+        self._icao = ''
 
         def pool_airports():
             while True:
                 self.loading = True
+                self._notify()
 
                 status = vatsim.status()
                 sections = map(lambda x: x[1], status)
                 _, _, clients, _, prefile = sections
-                pilots = map(lambda x: x.split(':'), clients)
-                pilots = filter(self._is_pilot, pilots)
-                pilots = map(self._to_pilot, pilots)
+                clients = list(clients)
+                clients = map(lambda x: x.split(':'), clients)
+                self.pilots = list(map(self._to_pilot, filter(self._is_pilot, clients)))
                 
-                self.pilots = list(pilots)
                 self.loading = False
+                self._notify()
 
                 sleep(60)
         Thread(target=pool_airports, daemon=True).start()
-
-    @property
-    def loading(self):
-        return self._loading
-
-    @loading.setter
-    def loading(self, value):
-        self._loading = value
-        self._notify()
 
     @property
     def icao(self):
@@ -45,16 +38,42 @@ class Model:
     @icao.setter
     def icao(self, value):
         self._icao = value.upper()
+
+        if len(value) == 4:
+            self.page = 'item'
+        else:
+            self.page = 'list'
+
         self._notify()
 
     @property
-    def pilots(self):
-        return self._pilots
+    def airports(self):
+        arrivals = defaultdict(lambda: 0)
+        departures = defaultdict(lambda: 0)
+        controllers = defaultdict(lambda: 0)
+        self._airports_icao = set()
 
-    @pilots.setter
-    def pilots(self, value):
-        self._pilots = value
-        self._notify()
+        for pilot in self.pilots:
+            departure = pilot[2]
+            arrival = pilot[3]
+
+            departures[departure] += 1
+            arrivals[arrival] += 1
+
+        _airports = set().union(arrivals.keys(), departures.keys(), controllers.keys())
+        _airports = map(str, _airports)
+        _airports = filter(lambda x: x != '', _airports)
+        _airports = [
+            airport for airport in _airports
+            if self.icao == '' or airport.startswith(self.icao)]
+        return [
+            (
+                airport,
+                str(arrivals[airport]),
+                str(departures[airport]),
+                str(controllers[airport]))
+            for airport in _airports
+        ]
 
     @property
     def departures(self):

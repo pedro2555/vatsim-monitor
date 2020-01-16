@@ -12,7 +12,9 @@ class Presenter:
         self.main_window = self.builder.get_object('airport_window')
         self.main_window.show_all()
 
+        self.stack = self.builder.get_object('stack')
         self.spinner = self.builder.get_object('spinner')
+        self.airports = self.builder.get_object('airports_store')
         self.arrivals = self.builder.get_object('arrivals_store')
         self.departures = self.builder.get_object('departures_store')
         self.txt_arrivals = self.builder.get_object('txt_arrivals')
@@ -34,13 +36,12 @@ class Presenter:
         self._search_changed()
 
     def _search_changed(self):
-        if len(self.search_text) != 4:
-            return
-
         self.model.icao = self.search_text
 
     def _on_model_changed(self, model):
+        self.stack.set_visible_child_name(model.page)
         self._update_loading(model.loading)
+        self._update_airports(model.airports)
         self._update_arrivals(model.arrivals)
         self._update_departures(model.departures)
 
@@ -49,6 +50,9 @@ class Presenter:
             GLib.idle_add(self.spinner.start)
         else:
             GLib.idle_add(self.spinner.stop)
+
+    def _update_airports(self, airports):
+        GLib.idle_add(self._update_list_store, self.airports, airports)
 
     def _update_arrivals(self, arrivals):
         GLib.idle_add(lambda: self.txt_arrivals.set_text(f'Arrivals ({len(arrivals)})'))
