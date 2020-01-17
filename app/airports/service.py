@@ -1,3 +1,4 @@
+from collections import defaultdict
 from time import sleep
 from threading import Thread
 
@@ -5,7 +6,8 @@ import vatsim
 
 class AirportsService:
     def __init__(self):
-        self.airports = dict()
+        self._airports = dict()
+        self._listeners = defaultdict(set)
         self._airports_listeners = set()
 
         Thread(target=self._pool_vatsim, daemon=True).start()
@@ -14,11 +16,22 @@ class AirportsService:
         _icao = icao.upper()
         return len(_icao) == 4 and _icao in self.airports.keys()
 
-    def on_airports_changed(self, callback):
-        self._airports_listeners.add(callback)
+    @property
+    def airports(self):
+        return self._airports
 
-        if len(self.airports) > 0:
-            callback(self.airports)
+    @airports.setter
+    def airports(self, value):
+        self._airports = value
+
+        for listener in self._listeners['airports']:
+            listener(value)
+
+    def add_listener(self, prop, callback):
+        self._listeners[prop].add(callback)
+
+        value = getattr(self, prop)
+        if value and len(value) > 0: callback(value)
 
     def _pool_vatsim(self, pool_seconds=60):
         while True:
@@ -35,7 +48,6 @@ class AirportsService:
                 airports[_pilot.arr_icao].arrivals.add(_pilot)
 
             self.airports = airports
-            self._notify()
 
             sleep(60)
 

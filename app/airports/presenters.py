@@ -8,7 +8,7 @@ class MainPresenter:
         self._filter = ''
         self._airports = dict()
 
-        airports_service.on_airports_changed(self.service_airports_changed)
+        airports_service.add_listener('airports', self.service_airports_changed)
         main_view.on_txt_search_text_changed(self.txt_search_text_changed)
 
     def txt_search_text_changed(self, text):
