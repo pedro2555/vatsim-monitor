@@ -1,4 +1,5 @@
 from collections import defaultdict
+from requests.exceptions import ConnectionError
 from time import sleep
 from threading import Thread
 
@@ -7,6 +8,7 @@ import vatsim
 class AirportsService:
     def __init__(self):
         self._loading = False
+        self._no_internet = False
         self._airports = dict()
         self._listeners = defaultdict(set)
         self._airports_listeners = set()
@@ -29,6 +31,17 @@ class AirportsService:
             listener(value)        
 
     @property
+    def no_internet(self):
+        return self._no_internet
+
+    @no_internet.setter
+    def no_internet(self, value):
+        self._no_internet = value
+
+        for listener in self._listeners['no_internet']:
+            listener(value)
+
+    @property
     def airports(self):
         return self._airports
 
@@ -47,19 +60,24 @@ class AirportsService:
 
     def _pool_vatsim(self, pool_seconds=60):
         while True:
-            status = vatsim.status()
-            parsed_sections = 1
-            _, _, clients, _, prefile = map(lambda x: x[parsed_sections], status)
-            clients = list(map(lambda x: x.split(':'), clients))
-            pilots = filter(lambda x: x[3].upper() == 'PILOT', clients)
+            try:
+                status = vatsim.status()
+                parsed_sections = 1
+                _, _, clients, _, prefile = map(lambda x: x[parsed_sections], status)
+                clients = list(map(lambda x: x.split(':'), clients))
+                pilots = filter(lambda x: x[3].upper() == 'PILOT', clients)
 
-            airports = AirportDefaultDict()
-            for pilot in pilots:
-                _pilot = Pilot(pilot[0], pilot[2], pilot[11], pilot[13])
-                airports[_pilot.dep_icao].departures.add(_pilot)
-                airports[_pilot.arr_icao].arrivals.add(_pilot)
+                airports = AirportDefaultDict()
+                for pilot in pilots:
+                    _pilot = Pilot(pilot[0], pilot[2], pilot[11], pilot[13])
+                    airports[_pilot.dep_icao].departures.add(_pilot)
+                    airports[_pilot.arr_icao].arrivals.add(_pilot)
+            except ConnectionError:
+                self.no_internet = True
+            else:
+                self.airports = airports
+                self.no_internet = False
 
-            self.airports = airports
             self.loading = False
             sleep(60)
             self.loading = True

@@ -55,9 +55,22 @@
           <object class="GtkSpinner" id="spinner">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Waiting for data servers.</property>
+            <property name="active">True</property>
           </object>
           <packing>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage" id="no_internet_img">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Could not reach data servers.</property>
+            <property name="stock">gtk-dialog-warning</property>
+          </object>
+          <packing>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>

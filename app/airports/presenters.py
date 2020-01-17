@@ -9,6 +9,7 @@ class MainPresenter:
         self._airports = dict()
 
         airports_service.add_listener('loading', self.service_loading_changed)
+        airports_service.add_listener('no_internet', self.service_no_internet_changed)
         airports_service.add_listener('airports', self.service_airports_changed)
         main_view.on_txt_search_text_changed(self.txt_search_text_changed)
 
@@ -19,6 +20,9 @@ class MainPresenter:
 
     def service_loading_changed(self, loading):
         self.view.set_loading(loading)
+
+    def service_no_internet_changed(self, no_internet):
+        self.view.set_no_internet(no_internet)
 
     def service_airports_changed(self, airports):
         self._airports = airports
