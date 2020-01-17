@@ -6,6 +6,7 @@ import vatsim
 
 class AirportsService:
     def __init__(self):
+        self._loading = False
         self._airports = dict()
         self._listeners = defaultdict(set)
         self._airports_listeners = set()
@@ -15,6 +16,17 @@ class AirportsService:
     def has_airport(self, icao):
         _icao = icao.upper()
         return len(_icao) == 4 and _icao in self.airports.keys()
+
+    @property
+    def loading(self):
+        return self._loading
+
+    @loading.setter
+    def loading(self, value):
+        self._loading = value
+
+        for listener in self._listeners['loading']:
+            listener(value)        
 
     @property
     def airports(self):
@@ -48,8 +60,9 @@ class AirportsService:
                 airports[_pilot.arr_icao].arrivals.add(_pilot)
 
             self.airports = airports
-
+            self.loading = False
             sleep(60)
+            self.loading = True
 
     def _notify(self):
         for listener in self._airports_listeners:

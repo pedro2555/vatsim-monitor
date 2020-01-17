@@ -3,12 +3,19 @@ from gi.repository import Gtk, GLib
 class MainView:
     def __init__(self, builder):
         self._window = builder.get_object('airport_window')
+        self.spinner = builder.get_object('spinner')
         self._txt_search_text_change_listeners = set()
 
         builder.connect_signals(self)
 
     def show(self):
         self._window.show_all()
+
+    def set_loading(self, loading):
+        if loading:
+            GLib.idle_add(self.spinner.start)
+        else:
+            GLib.idle_add(self.spinner.stop)
 
     def on_txt_search_text_changed(self, callback):
         self._txt_search_text_change_listeners.add(callback)

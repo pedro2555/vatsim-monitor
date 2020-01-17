@@ -8,6 +8,7 @@ class MainPresenter:
         self._filter = ''
         self._airports = dict()
 
+        airports_service.add_listener('loading', self.service_loading_changed)
         airports_service.add_listener('airports', self.service_airports_changed)
         main_view.on_txt_search_text_changed(self.txt_search_text_changed)
 
@@ -15,6 +16,9 @@ class MainPresenter:
         self._filter = text.upper()
 
         self._update_views()
+
+    def service_loading_changed(self, loading):
+        self.view.set_loading(loading)
 
     def service_airports_changed(self, airports):
         self._airports = airports
@@ -24,7 +28,7 @@ class MainPresenter:
     def _update_views(self):
         if self.service.has_airport(self._filter):
             airport = self._airports[self._filter]
-            
+
             self.item_presenter.show(airport)
         else:
             self.list_presenter.show(self._airports, self._filter)
