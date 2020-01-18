@@ -37,7 +37,7 @@ cache:
     - /C/tools/msys64
 
 script:
-  - make build
+  - $msys2 make build
   - 7z a win-dist.zip dist
 
 deploy:
@@ -45,4 +45,3 @@ deploy:
   api_key: "$GH_TOKEN"
   file: "win-dist.zip"
   skip_cleanup: true
-  
